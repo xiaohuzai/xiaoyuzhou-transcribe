@@ -1,11 +1,14 @@
 ---
 name: xiaoyuzhou-transcribe
-description: 小宇宙 (XiaoyuzhouFM) 播客转写 skill。给 agent 提供机械部分（ASR + 说话人标注 + 时间戳格式化），LLM 总结部分由 agent 自己完成。**设计原则：skill 是"提示 + 工具"，机械的部分用 bash/python，AI 总结的部分 agent 用自己的 LLM 干**。
+description: "小宇宙 (XiaoyuzhouFM) 播客转写 skill. 端到端把播客链接转成带说话人标注的完整转写 + 主题分组结构化总结的 markdown. 设计原则: skill 是提示 + 工具, 机械部分用 bash/python, AI 总结部分由 agent 自己的 LLM 完成."
+version: 1.2.0
+license: MIT
 triggers:
   - 小宇宙链接
   - xiaoyuzhoufm.com/episode/
   - 播客转写
   - 音频转文字
+  - podcast to markdown
 ---
 
 # xiaoyuzhou-transcribe
@@ -93,10 +96,14 @@ bash scripts/pipeline.sh "https://www.xiaoyuzhoufm.com/episode/xxx"
 
 ### 模式 B: 本地 Toolkit 同步（兜底）
 
-仅适用于音频**已经是本地文件**的场景：
+仅适用于音频**已经是本地文件**的场景（其他机器 scp 过来、用户提供的录音）：
 
 ```bash
-$(command -v qwen3-asr || echo /root/.hermes/hermes-agent/venv/bin/qwen3-asr) \
+# 用户自己装 qwen3-asr (任选一种):
+#   pip install qwen3-asr-toolkit
+#   或从 https://github.com/QwenLM/Qwen3-ASR-Toolkit 装
+
+qwen3-asr \
   --input-file /tmp/<audio> \
   --dashscope-api-key "$DASHSCOPE_API_KEY" \
   --num-threads 2 --save-srt
@@ -141,7 +148,10 @@ curl, jq
 python3 ≥ 3.8
 
 # 凭据
-# DASHSCOPE_API_KEY 在 ~/.hermes/.env 或环境变量
+# DASHSCOPE_API_KEY 从以下位置加载 (跨 agent 兼容):
+#   1. 环境变量
+#   2. ~/.config/xiaoyuzhou-transcribe/.env (推荐, 跨 agent)
+#   3. ~/.hermes/.env (Hermes Agent 兼容)
 # 申请: https://dashscope.console.aliyun.com/apiKey
 ```
 

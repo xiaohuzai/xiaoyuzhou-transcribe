@@ -9,7 +9,23 @@
 # 适配: hermes xiaoyuzhou-transcribe skill (2026-06-01)
 #   - 修复 Bearer token 字面量 *** 替换为 ${DASHSCOPE_API_KEY}
 #   - 修复 set -u 下 QWEN_API_KEY unbound variable
-#   - 自动从 ~/.hermes/.env 加载 DASHSCOPE_API_KEY (兼容 ${HERMES_HOME})
+# 加载 DASHSCOPE_API_KEY (跨 agent 兼容, 不绑定任何 agent 平台)
+# 优先级: 环境变量 > ~/.config/xiaoyuzhou-transcribe/.env > ~/.hermes/.env (hermes 兼容)
+if [ -z "${DASHSCOPE_API_KEY:-}" ] && [ -f "$HOME/.config/xiaoyuzhou-transcribe/.env" ]; then
+    DASHSCOPE_API_KEY=$(grep -E "^DASHSCOPE_API_KEY=" "$HOME/.config/xiaoyuzhou-transcribe/.env" 2>/dev/null | head -1 | cut -d'=' -f2-)
+    export DASHSCOPE_API_KEY
+fi
+if [ -z "${DASHSCOPE_API_KEY:-}" ] && [ -f "${HERMES_HOME:-$HOME/.hermes}/.env" ]; then
+    DASHSCOPE_API_KEY=$(grep -E "^DASHSCOPE_API_KEY=" "${HERMES_HOME:-$HOME/.hermes}/.env" 2>/dev/null | head -1 | cut -d'=' -f2-)
+    export DASHSCOPE_API_KEY
+fi
+export DASHSCOPE_API_KEY
+if [ -z "$DASHSCOPE_API_KEY" ]; then
+    log_error "请设置环境变量 DASHSCOPE_API_KEY (或 QWEN_API_KEY), 或写入以下任一文件:"
+    log_error "  - ~/.config/xiaoyuzhou-transcribe/.env (推荐, 跨 agent)"
+    log_error "  - ~/.hermes/.env (Hermes Agent 兼容)"
+    exit 1
+fi
 
 set -euo pipefail
 
@@ -159,17 +175,16 @@ fetch_result() {
     log_info "已保存到: $output_file"
 }
 
-# 加载 API key
+# 加载 API key - 由文件顶部逻辑统一处理 (跨 agent 兼容)
 load_api_key() {
-    if [ -z "${DASHSCOPE_API_KEY:-}" ]; then
-        DASHSCOPE_API_KEY="${QWEN_API_KEY:-}"
-    fi
-    if [ -z "${DASHSCOPE_API_KEY:-}" ] && [ -f "${HERMES_HOME:-$HOME/.hermes}/.env" ]; then
-        DASHSCOPE_API_KEY=$(grep -E "^DASHSCOPE_API_KEY=" "${HERMES_HOME:-$HOME/.hermes}/.env" 2>/dev/null | head -1 | cut -d'=' -f2-)
-    fi
-    export DASHSCOPE_API_KEY
     if [ -z "$DASHSCOPE_API_KEY" ]; then
-        log_error "请设置环境变量 DASHSCOPE_API_KEY (或 QWEN_API_KEY)，或确保 ~/.hermes/.env 中存在"
+        DASHSCOPE_API_KEY="${QWEN_API_KEY:-}"
+        export DASHSCOPE_API_KEY
+    fi
+    if [ -z "$DASHSCOPE_API_KEY" ]; then
+        log_error "请设置环境变量 DASHSCOPE_API_KEY (或 QWEN_API_KEY), 或写入以下任一文件:"
+        log_error "  - ~/.config/xiaoyuzhou-transcribe/.env (推荐, 跨 agent)"
+        log_error "  - ~/.hermes/.env (Hermes Agent 兼容)"
         exit 1
     fi
 }

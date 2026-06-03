@@ -62,10 +62,22 @@ if [ -z "$SPEAKERS_JSON" ]; then
 fi
 
 # ---------- 环境 ----------
-# 加载 DASHSCOPE_API_KEY (兼容自定义 HERMES_HOME)
-[ -f "${HERMES_HOME:-$HOME/.hermes}/.env" ] && source "${HERMES_HOME:-$HOME/.hermes}/.env" 2>/dev/null || true
+# 加载 DASHSCOPE_API_KEY (跨 agent 兼容, 不绑定任何 agent 平台)
+# 优先级: 环境变量 > ~/.config/xiaoyuzhou-transcribe/.env > ~/.hermes/.env (hermes 兼容)
+if [ -z "${DASHSCOPE_API_KEY:-}" ] && [ -f "$HOME/.config/xiaoyuzhou-transcribe/.env" ]; then
+    DASHSCOPE_API_KEY=$(grep -E "^DASHSCOPE_API_KEY=" "$HOME/.config/xiaoyuzhou-transcribe/.env" 2>/dev/null | head -1 | cut -d'=' -f2-)
+    export DASHSCOPE_API_KEY
+fi
+if [ -z "${DASHSCOPE_API_KEY:-}" ] && [ -f "${HERMES_HOME:-$HOME/.hermes}/.env" ]; then
+    DASHSCOPE_API_KEY=$(grep -E "^DASHSCOPE_API_KEY=" "${HERMES_HOME:-$HOME/.hermes}/.env" 2>/dev/null | head -1 | cut -d'=' -f2-)
+    export DASHSCOPE_API_KEY
+fi
 if [ -z "${DASHSCOPE_API_KEY:-}" ]; then
-    echo "❌ DASHSCOPE_API_KEY 未设置（检查 ~/.hermes/.env）" >&2
+    echo "❌ DASHSCOPE_API_KEY 未设置" >&2
+    echo "   三个来源任选一个:" >&2
+    echo "     1. 环境变量: export DASHSCOPE_API_KEY=*** ~/.bashrc)" >&2
+    echo "     2. 配置文件: echo 'DASHSCOPE_API_KEY=***' > ~/.config/xiaoyuzhou-transcribe/.env" >&2
+    echo "     3. Hermes 兼容: 加进 ~/.hermes/.env" >&2
     exit 1
 fi
 

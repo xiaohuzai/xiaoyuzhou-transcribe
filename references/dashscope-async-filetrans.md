@@ -131,7 +131,7 @@ curl -sL "${TRANSCRIPTION_URL}" > /tmp/transcript_raw.json
 2. **`set -u` + 未设 `QWEN_API_KEY`**：报 `unbound variable`。兼容补丁：`if [ -z "${DASHSCOPE_API_KEY:-}" ]; then DASHSCOPE_API_KEY="${QWEN_API_KEY:-}"; fi`。
 3. **file_url 必须公网可达**：私网 / 鉴权 URL 会失败。**小宇宙的 `media.xyzcdn.net` 是公开的，OK**。
 4. **情绪检测（emotion）**：实测全部 neutral，**不要依赖 emotion 字段做情绪分析**。
-5. **API key 自动加载**：脚本默认从 `~/.hermes/.env` 读 `DASHSCOPE_API_KEY`。如果换了 env 文件路径或 key 名，需要修脚本里的 `load_api_key()` 函数。
+5. **API key 自动加载**：脚本默认从 `~/.config/xiaoyuzhou-transcribe/.env` 读 `DASHSCOPE_API_KEY`（兼容 `~/.hermes/.env` 和环境变量）。如果换了 env 文件路径或 key 名，需要修脚本里的 `load_api_key()` 函数。
 
 ## 适用 vs 不适用场景
 
