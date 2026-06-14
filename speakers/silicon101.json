@@ -1,0 +1,26 @@
+{
+  "_comment": "说话人关键词表 - 硅谷101 系列。匹配模式：'marker in text'。每个说话人可以配多个变体 marker。",
+  "_usage": "python3 format_transcript.py raw.json out.md --speakers speakers_silicon101.json",
+  "泓君": [
+    "我是红军",
+    "我是泓君",
+    "我是红君",
+    "大家好我是红军",
+    "大家好欢迎收听硅谷101"
+  ],
+  "傅盛": [
+    "我是傅盛",
+    "傅盛你好",
+    "傅盛总",
+    "Hello 傅盛",
+    "Hello，傅盛"
+  ],
+  "硅谷徐老师": [
+    "我是徐老师",
+    "我是硅谷徐老师",
+    "徐老师你好",
+    "硅谷徐老师",
+    "Hello 徐老师",
+    "Hello，徐老师"
+  ]
+}

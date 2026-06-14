@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 测试 / 临时
+/tmp/
+*.log
+.env
+.env.local
+
+# 隐私 (如果误拷贝)
+auth.json
+secrets/
+
+# 本地 patch 文件 (备份在外面 /root/workspace/)
+xiaoyuzhou-transcribe.*.patch
